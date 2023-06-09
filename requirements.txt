@@ -1,0 +1,9 @@
+cysimdjson
+Shapely
+pyproj
+click
+requests
+morecantile
+mercantile
+affine
+rasterio
