@@ -17,9 +17,8 @@ from data_tiles_generator.utils import reproject_source, load_tms
 @options.output_crs_opt
 @options.zoom_opt
 @options.output_dir_arg
-@options.resolution_opt
 @options.tilesize_opt
-def cli(urn, dest_crs, zoom_list, output_dir, resolution, tilesize):
+def cli(urn, dest_crs, zoom_list, output_dir, tilesize):
     session = requests.Session()
     retries = Retry(total=1,
                     backoff_factor=0.1,

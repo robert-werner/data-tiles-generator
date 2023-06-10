@@ -38,12 +38,3 @@ tilesize_opt = option(
     type=int,
     default=256,
     help='Разрешение тайла (на выходе квадрат стороной указанного размера).')
-
-resolution_opt = option(
-    '--resolution',
-    "resolution",
-    nargs=1,
-    type=int,
-    default=1,
-    help='Размер пиксела (координатной сетки привязки, чем меньше число, тем больше точность)'
-)
