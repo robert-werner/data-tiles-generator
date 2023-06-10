@@ -7,7 +7,7 @@ from data_tiles_generator.classes.source import Source
 class Sources(Response):
 
     def __init__(self, request_response):
-        super().__init__(json.loads(request_response))
+        super().__init__(request_response)
         self.sources_root = self.root['response']['sources']
 
     @property

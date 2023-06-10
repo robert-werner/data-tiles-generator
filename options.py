@@ -18,7 +18,7 @@ output_dir_arg = argument(
 
 output_crs_opt = option('--out-crs',
                         'dest_crs',
-                        default='EPSG:3857',
+                        default='EPSG:4326',
                         callback=crs_handler,
                         help="Выходная система координат тайлов.")
 

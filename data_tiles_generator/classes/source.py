@@ -64,7 +64,7 @@ class Source:
     @property
     def crs(self):
         if self.location:
-            return self.location['crs']['properties']['name']
+            return self._source['shape']['crs']['properties']['name']
 
     @property
     def sid(self):

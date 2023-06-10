@@ -54,4 +54,4 @@ def zoom_handler(ctx, param, value):
             if _value < 0 or _value > 24:
                 raise click.BadParameter('Поддерживаются только уровни увеличения с 0 по 24 (включительно).')
             zooms.append(str(_value))
-    return ",".join(zooms)
+    return zooms
