@@ -1,6 +1,6 @@
 Как запускать:
 
-python datatile_generator.py URN --out-crs EPSG:3857 --zooms 3,4,5 --tilesize 256 --resolution 1  
+python datatile_generator.py URN --out-crs EPSG:3857 --zooms 3,4,5 --tilesize 256 OUTPUT_FOLDER  
 
 На выходе папка с дататайлами *.json.
 
@@ -8,4 +8,4 @@ python datatile_generator.py URN --out-crs EPSG:3857 --zooms 3,4,5 --tilesize 25
 – out-crs: выходная СК
 – zooms: уровни увеличения
 – tilesize: размер тайла 
-– resolution: размер ячейки (чем меньше, тем точнее расположение пиксела)
+– OUTPUT_FOLDER: выходная папка
