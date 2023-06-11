@@ -30,8 +30,8 @@ def cli(urn, dest_crs, zoom_list, output_dir, tilesize):
     })) as sources_request:
         sources_list = Sources(sources_request.json())
     tms = load_tms(dest_crs, tilesize)
+    output_datatile = {'items': 0, 'data': []}
     for zoom in zoom_list:
-        output_datatile = {'items': 0, 'data': []}
         for source in sources_list:
             output_datatile['data'].append(
                 source.src_index
@@ -51,8 +51,17 @@ def cli(urn, dest_crs, zoom_list, output_dir, tilesize):
                 output_datatile['data'].extend(
                     [None, None]
                 )
-        with open(os.path.join(output_dir, f'{zoom}.json'), 'w', encoding='utf-8') as zoom_dt:
-            json.dump(output_datatile, zoom_dt)
+            output_folder = os.path.join(output_dir, f'{zoom}/{tile.x}')
+            output_file = os.path.join(output_folder, f'{tile.y}.json')
+            os.makedirs(output_folder, exist_ok=True)
+            if os.path.exists(output_file):
+                with open(output_file, 'r', encoding='utf-8') as output_file_fp:
+                    output_file_json = json.load(output_file_fp)
+                output_datatile['items'] += output_file_json['items']
+                output_datatile['data'].extend(output_file_json['data'])
+            with open(output_file, 'w', encoding='utf-8') as zoom_dt:
+                json.dump(output_datatile, zoom_dt)
+            output_datatile = {'items': 0, 'data': []}
 
 
 if __name__ == '__main__':
