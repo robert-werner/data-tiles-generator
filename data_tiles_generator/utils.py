@@ -13,7 +13,7 @@ def reproject_shape(shape, src_crs, dest_crs):
         raise Exception(f'Определение исходной СК {dest_crs} отсутствует!')
     if not dest_crs_def:
         raise Exception(f'Определение конечной СК {dest_crs} отсутствует!')
-    return Transformer.from_crs(src_crs, dest_crs).transform(shape.x, shape.y)
+    return Transformer.from_crs(crs_from=src_crs_def, crs_to=dest_crs_def, always_xy=True).transform(shape.x, shape.y)
 
 
 def reproject_source(source, dest_crs):
