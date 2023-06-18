@@ -13,7 +13,7 @@ def crs_handler(ctx, param, value):
         if not epsg_auth:
             raise click.BadParameter(
                 'Поддерживаются системы координат только из EPSG-базы данных (см. https://epsg.org/)')
-    return ":".join(crs_def.to_authority(auth_name='EPSG'))
+    return crs_def
 
 
 def zoom_handler(ctx, param, value):
@@ -53,5 +53,5 @@ def zoom_handler(ctx, param, value):
             _value = int(value)
             if _value < 0 or _value > 24:
                 raise click.BadParameter('Поддерживаются только уровни увеличения с 0 по 24 (включительно).')
-            zooms.append(str(_value))
+            zooms.append(int(_value))
     return zooms

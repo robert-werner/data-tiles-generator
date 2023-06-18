@@ -4,3 +4,4 @@ click
 requests
 morecantile
 mercantile
+rasterio

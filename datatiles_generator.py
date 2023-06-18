@@ -1,6 +1,8 @@
 import json
 import os.path
+from math import floor
 
+import rasterio.transform
 import requests
 from click import command
 from requests.adapters import HTTPAdapter, Retry
@@ -9,7 +11,7 @@ import options
 from data_tiles_generator.classes.sources import Sources
 from data_tiles_generator.config import HEADERS
 from data_tiles_generator.constants import SOURCES_URL
-from data_tiles_generator.utils import reproject_source, load_tms
+from data_tiles_generator.utils import reproject_source, load_tms, axes_directions
 
 
 @command(short_help='Генератор дата-тайлов из списков источников')
@@ -31,21 +33,30 @@ def cli(urn, dest_crs, zoom_list, output_dir, tilesize):
         sources_list = Sources(sources_request.json())
     tms = load_tms(dest_crs, tilesize)
     output_datatile = {'items': 0, 'data': []}
-    for zoom in zoom_list:
-        for source in sources_list:
+    for source in sources_list:
+        for zoom in zoom_list:
             output_datatile['data'].append(
                 source.src_index
             )
             output_datatile['items'] += 1
             if source.has_geo:
-                reprojected_location = reproject_source(source, dest_crs)
-                tile = tms.tile(reprojected_location[0], reprojected_location[1], zoom)
+                reprojected_location_x, reprojected_location_y = reproject_source(source, dest_crs)
+                tile = tms.tile(reprojected_location_x, reprojected_location_y, zoom)
                 tile_bbox = tms.xy_bounds(tile)
-                pix_x = (reprojected_location[0] - tile_bbox.left) / (tile_bbox.right - tile_bbox.left)
-                pix_y = (tile_bbox.top - reprojected_location[1]) / (tile_bbox.top - tile_bbox.bottom)
+                if dest_crs.is_projected:
+                    minx, maxx, miny, maxy = tile_bbox.bottom, tile_bbox.right, tile_bbox.top, tile_bbox.left
+                    x_resolution = (maxx - minx) / tilesize
+                    y_resolution = (maxy - miny) / tilesize
+                    x_pixels = int((reprojected_location_x - minx) / x_resolution)
+                    y_pixels = int((maxy - reprojected_location_y) / y_resolution)
+                elif dest_crs.is_geographic:
+                    minlon, maxlon, minlat, maxlat = tile_bbox.left, tile_bbox.right, tile_bbox.bottom, tile_bbox.top
+                    lon_resolution = (maxlon - minlon) / tilesize
+                    lat_resolution = (maxlat - minlat) / tilesize
+                    x_pixels = int((reprojected_location_x - minlon) / lon_resolution)
+                    y_pixels = int((maxlat - reprojected_location_y) / lat_resolution)
                 output_datatile['data'].extend(
-                    [int(pix_x * tilesize),
-                     int(pix_y * tilesize)]
+                    [x_pixels, y_pixels]
                 )
             else:
                 output_datatile['data'].extend(
@@ -62,6 +73,7 @@ def cli(urn, dest_crs, zoom_list, output_dir, tilesize):
             with open(output_file, 'w', encoding='utf-8') as zoom_dt:
                 json.dump(output_datatile, zoom_dt)
             output_datatile = {'items': 0, 'data': []}
+
 
 
 if __name__ == '__main__':

@@ -1,7 +1,5 @@
 import morecantile
-from pyproj import CRS, Transformer, transform
-
-from data_tiles_generator.constants import CUSTOM_TMS
+from pyproj import CRS, Transformer
 
 
 def reproject_shape(shape, src_crs, dest_crs):
@@ -22,17 +20,31 @@ def reproject_source(source, dest_crs):
 
 
 def load_tms(dest_crs, tilesize):
-    if dest_crs in CUSTOM_TMS:
-        tms_params = CUSTOM_TMS[dest_crs]
-        tms_params['tile_width'] = tilesize
-        tms_params['tile_height'] = tilesize
-        tms = morecantile.TileMatrixSet.custom(**tms_params)
+    dest_crs_name = ":".join(dest_crs.to_authority(auth_name='EPSG'))
+    KNOWN_TMS = {
+        'EPSG:4326': 'WGS1984Quad',
+        'EPSG:3857': 'WebMercatorQuad'
+    }
+    if dest_crs_name in KNOWN_TMS:
+        tms = morecantile.tms.get(KNOWN_TMS[dest_crs_name]).copy(update={
+            'tileWidth': tilesize,
+            'tileHeight': tilesize
+        },
+            deep=True)
     else:
-        transformer = Transformer.from_crs(CRS('EPSG:4326'), dest_crs, always_xy=True)
-        tms_params = {'extent': list(transformer.transform_bounds(*list(CRS.from_user_input(dest_crs).area_of_use.bounds))),
-                      'crs': CRS.from_user_input(dest_crs), 'extent_crs': dest_crs,
-                      'tile_width': tilesize,
-                      'tile_height': tilesize}
+        tms_params = {
+            'crs': dest_crs,
+            'extent': dest_crs.area_of_use.bounds,
+            'extent_crs': CRS.from_epsg(4326), 'tile_width': tilesize, 'tile_height': tilesize}
         tms = morecantile.TileMatrixSet.custom(**tms_params)
     return tms
 
+
+def axes_directions(crs):
+    axes = []
+    for axis in crs.axis_info:
+        axes.append(axis.direction)
+    axes = list(set(axes))
+    if len(axes) == 1:
+        return axes[0]
+    return axes
