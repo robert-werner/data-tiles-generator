@@ -48,3 +48,22 @@ def axes_directions(crs):
     if len(axes) == 1:
         return axes[0]
     return axes
+
+
+def tilepoint2pix(source, crs, bbox, resolution, x, y):
+    if source.has_geo:
+        tile_bbox = bbox
+        if crs.is_projected:
+            minx, maxx, miny, maxy = tile_bbox.bottom, tile_bbox.right, tile_bbox.top, tile_bbox.left
+            x_resolution = (maxx - minx) / resolution
+            y_resolution = (maxy - miny) / resolution
+            x_pixels = int((x - minx) / x_resolution)
+            y_pixels = int((maxy - y) / y_resolution)
+        elif crs.is_geographic:
+            minlon, maxlon, minlat, maxlat = tile_bbox.left, tile_bbox.right, tile_bbox.bottom, tile_bbox.top
+            lon_resolution = (maxlon - minlon) / resolution
+            lat_resolution = (maxlat - minlat) / resolution
+            x_pixels = int((x - minlon) / lon_resolution)
+            y_pixels = int((maxlat - y) / lat_resolution)
+        return x_pixels, y_pixels
+    return None, None
