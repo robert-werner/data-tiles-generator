@@ -33,19 +33,17 @@ def cli(urn, dest_crs, zoom_list, output_dir, tilesize):
         sources_list = Sources(sources_request.json())
     tms = load_tms(dest_crs, tilesize)
     for source in sources_list:
-        reprojected_location_x, reprojected_location_y = reproject_source(source, dest_crs)
         for zoom in zoom_list:
             output_json = {
                 'data': []
             }
-            tile = tms.tile(reprojected_location_x, reprojected_location_y, zoom)
+            tile = tms.tile(source.location.x, source.location.y, zoom)
             output_folder = os.path.join(output_dir, f'{zoom}/{tile.x}')
             os.makedirs(output_folder, exist_ok=True)
             output_file = os.path.join(output_folder, f'{tile.y}.json')
-            output_json['data'].extend([source.src_index, *tilepoint2pix(source, dest_crs, tms.xy_bounds(tile),
-                                                                         tilesize,
-                                                                         reprojected_location_x,
-                                                                         reprojected_location_y)])
+            output_json['data'].extend([source.src_index, *tilepoint2pix(reproject_source(source, dest_crs),
+                                                                         tms.xy_bounds(tile),
+                                                                         tilesize)])
             if not os.path.isfile(output_file):
                 with open(output_file, 'w') as output_json_file:
                     json.dump(

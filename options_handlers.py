@@ -13,6 +13,10 @@ def crs_handler(ctx, param, value):
         if not epsg_auth:
             raise click.BadParameter(
                 'Поддерживаются системы координат только из EPSG-базы данных (см. https://epsg.org/)')
+        if crs_def.is_geographic:
+            raise click.BadParameter(
+                f'Географические СК (EPSG:{epsg_auth}) не поддерживаются. Поддерживаются только проектированные СК.'
+            )
     return crs_def
 
 
